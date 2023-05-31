@@ -1,4 +1,5 @@
 //packs boilerplate
+require('dotenv').config();
 const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
@@ -9,6 +10,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
 mongoose.connect(url, {
@@ -18,7 +20,7 @@ mongoose.connect(url, {
 .then(() => console.log('mongoose connection to local db is successful'))
 .catch((error) => console.error('Error connecting to local db:', error));
 
-const secret = 'thisIsOurLittleSecret';
+
 
 //get methods
 app.get('/', (req, res)=>{
@@ -30,6 +32,7 @@ app.get('/login', (req, res)=>{
 app.get('/register', (req, res)=>{
     res.render('register');
 });
+
 
 app.post('/register', (req, res)=>{
     const newUser = new User({
