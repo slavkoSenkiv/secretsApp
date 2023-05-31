@@ -18,6 +18,8 @@ mongoose.connect(url, {
 .then(() => console.log('mongoose connection to local db is successful'))
 .catch((error) => console.error('Error connecting to local db:', error));
 
+const secret = 'thisIsOurLittleSecret';
+
 //get methods
 app.get('/', (req, res)=>{
     res.render('home');
