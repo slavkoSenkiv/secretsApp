@@ -2,6 +2,7 @@
 const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
+const encrypt = require('mongoose-encryption');
 const User = require('./User');
 const app = express();
 app.use(express.urlencoded({extended:true}));
