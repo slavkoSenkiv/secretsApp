@@ -9,6 +9,9 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 const bcrypt = require('bcrypt');
 const saltingRounds = 10;
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
 
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
