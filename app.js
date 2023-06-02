@@ -1,17 +1,33 @@
-//packs boilerplate
+//require packs
 const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const User = require('./User');
-const app = express();
-app.use(express.urlencoded({extended:true}));
-app.use(express.static('public'));
-app.set('view engine', 'ejs');
 const bcrypt = require('bcrypt');
 const saltingRounds = 10;
 const session = require('express-session');
 const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
+
+//express, ejs, passport and session boilerplate
+const app = express();
+app.use(express.urlencoded({extended:true}));
+
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+app.use(session({
+    secret: 'Our little secret',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
