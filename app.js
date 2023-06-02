@@ -48,51 +48,57 @@ app.get('/login', (req, res)=>{
 app.get('/register', (req, res)=>{
     res.render('register');
 });
+app.get('/secrets', (req, res)=>{
+    if(req.isAuthenticated()){
+        res.render('secrets');
+    }else{
+        res.redirect('/login');
+    }
+});
+app.get("/logout", function(req, res) {
+    req.logout((err)=>{
+      if (err) {
+        console.log(err);
+      }
+      res.redirect("/");
+    });
+});
 
 app.post('/register', (req, res)=>{
-    bcrypt.hash(req.body.password, saltingRounds, (err, hash)=>{
-        
-        const newUser = new User({
-            email: req.body.username,
-            password: hash
-        });
+    let username = req.body.username;
+    let password = req.body.password;
 
-        newUser.save()
-        .then(()=>{
-            console.log('passed input');
-            res.render('secrets');
-        })
-        .catch((error)=>{
-            console.log(error);
-        });
-    })
+    User.register({username: username}, password, (err, user)=>{
+        if(err){
+            console.log(err);
+            res.redirect('/register');
+        }else{
+            passport.authenticate('local')(req, res, ()=>{
+                res.redirect('/secrets');
+            });
+        };
+    });
     
 });
 
 app.post('/login', (req, res)=>{
     const username = req.body.username;
     const password = req.body.password;
-    console.log('hashed pass from login', password);
 
-    User.findOne({email: username})
-        .then((foundUser)=>{
-            if(foundUser){
-                bcrypt.compare(password, foundUser.password, (err, result)=>{
-                    if(result==true){
-                        res.render('secrets');
-                    }else{
-                        console.log(err);
-                    }
-                });
-            }else{
-                res.send('invalid password');
-                console.log('invalid password');
-            };
-        })
-        .catch((error)=>{
-            res.send('invalid login');
-            console.log(error);
-        });
+    const user = new User ({
+        username: username, 
+        password: password
+    })
+
+    req.login(user, (err)=>{
+        if(err){
+            console.log(err);
+        }else{
+            passport.authenticate('local')(req, res, ()=>{
+                res.redirect('/secrets');
+            })
+        }
+    })
 });
 
 app.listen(3000, ()=>{
