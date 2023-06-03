@@ -3,10 +3,12 @@ const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const User = require('./User');
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const saltingRounds = 10;
 const session = require('express-session');
 const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 //express, ejs, passport and session boilerplate
 const app = express();
@@ -28,6 +30,18 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/secrets",
+    userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
 
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
@@ -41,6 +55,12 @@ mongoose.connect(url, {
 //get methods
 app.get('/', (req, res)=>{
     res.render('home');
+});
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
+
+app.get('/auth/google/secrets', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  // Authentication successful, redirect to secrets or any other desired route
+  res.redirect('/secrets');
 });
 app.get('/login', (req, res)=>{
     res.render('login');
