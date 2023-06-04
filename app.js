@@ -11,13 +11,14 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-//express, ejs, passport and session boilerplate
+//express, ejs boilerplate
 const app = express();
 app.use(express.urlencoded({extended:true}));
 
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+//auth boilerplate
 function isLoggedIn(req, res, next){
     req.user ? next() : res.sendStatus(401);
 }
@@ -46,7 +47,6 @@ passport.use(new GoogleStrategy({
     });
   }
 ));
-
 
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
@@ -95,6 +95,7 @@ app.get("/logout", function(req, res) {
     });
 });
 
+//post methods
 app.post('/register', (req, res)=>{
     let username = req.body.username;
     let password = req.body.password;
