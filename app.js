@@ -6,6 +6,7 @@ const User = require('./User');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const saltingRounds = 10;
+require('./auth');
 const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -47,7 +48,6 @@ passport.use(new GoogleStrategy({
 ));
 
 
-
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
 mongoose.connect(url, {
@@ -76,17 +76,14 @@ app.get('/login', (req, res)=>{
 });
 
 app.get('/register', (req, res)=>{
-    res.render('register');se
+    res.render('register');
 });
 
 app.get('/secrets', isLoggedIn, (req, res)=>{
-    if(req.isAuthenticated()){
-        let name = req.user.displayName;
-        console.log(`hello ${name}`);
-        res.render('secrets');
-    }else{
-        res.redirect('/login');
-    }
+    let name = req.user.displayName;
+    console.log(`hello ${name}`);
+    res.render('secrets');
+
 });
 
 app.get("/logout", function(req, res) {
