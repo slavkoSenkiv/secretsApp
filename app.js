@@ -9,7 +9,6 @@ const saltingRounds = 10;
 require('./auth');
 const session = require('express-session');
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 //express, ejs boilerplate
 const app = express();
@@ -32,21 +31,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.use(User.createStrategy());
-
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
 
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
