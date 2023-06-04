@@ -17,18 +17,21 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+function isLoggedIn(req, res, next){
+    req.user ? next() : res.sendStatus(401);
+}
+
 app.use(session({
     secret: 'Our little secret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {secure: false}
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -43,6 +46,8 @@ passport.use(new GoogleStrategy({
   }
 ));
 
+
+
 //mongoose boilerplate
 const url = "mongodb://127.0.0.1:27017/usersDB"; 
 mongoose.connect(url, {
@@ -56,25 +61,34 @@ mongoose.connect(url, {
 app.get('/', (req, res)=>{
     res.render('home');
 });
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
 
-app.get('/auth/google/secrets', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  // Authentication successful, redirect to secrets or any other desired route
-  res.redirect('/secrets');
-});
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['email', 'profile'] }));
+
+app.get('/auth/google/secrets', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/secrets');
+  });
+
 app.get('/login', (req, res)=>{
     res.render('login');
 });
+
 app.get('/register', (req, res)=>{
-    res.render('register');
+    res.render('register');se
 });
-app.get('/secrets', (req, res)=>{
+
+app.get('/secrets', isLoggedIn, (req, res)=>{
     if(req.isAuthenticated()){
+        let name = req.user.displayName;
+        console.log(`hello ${name}`);
         res.render('secrets');
     }else{
         res.redirect('/login');
     }
 });
+
 app.get("/logout", function(req, res) {
     req.logout((err)=>{
       if (err) {
